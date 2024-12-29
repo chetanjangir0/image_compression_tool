@@ -36,6 +36,48 @@ typedef struct{
     unsigned char red;
 } RGB;
 
+typedef struct{
+    unsigned char count;
+    unsigned char value;
+
+} RLEPair;
+
+typedef struct {
+    int width;
+    int height;
+    RLEPair *Red;
+    RLEPair *green;
+    RLEPair *blue;
+    int redSize;
+    int greenSize;
+    int blueSize;
+} RLEData;
+
+RGB** readBMP(const char* filename, int* width, int* height);
+void freeBMP(RGB **pixels, int height);
+
+
+int main(){
+    int width, height;
+    const char* filename = "sample_640x426.bmp";
+
+    RGB** pixels = readBMP(filename, &width, &height);
+    if (pixels == NULL){
+        return 1;
+    }
+
+    printf("First pixel RGB: (%d, %d, %d)\n",
+            pixels[0][1].red,
+            pixels[0][1].green,
+            pixels[0][1].blue 
+    );
+
+    freeBMP(pixels, height);
+
+}
+
+
+
 RGB** readBMP(const char* filename, int* width, int* height){
     FILE* file = fopen(filename, "rb"); // read mode with binary mode instead of text mode
     if (!file){
@@ -92,21 +134,31 @@ void freeBMP(RGB **pixels, int height){
     free(pixels);
 }
 
-int main(){
-    int width, height;
-    const char* filename = "sample_640x426.bmp";
+RLEPair* encodeChannel(unsigned char* channelData, int size, int* outSize){
+    RLEPair* encoded = malloc(size * sizeof(RLEPair)); // worst case size
 
-    RGB** pixels = readBMP(filename, &width, &height);
-    if (pixels == NULL){
-        return 1;
+    int encodeIndex = 0;
+    int count = 0;
+    unsigned char currentValue = channelData[0];
+
+    for (int i =  0; i < size; i++){
+        if(currentValue == channelData[i] && currentValue < 255){
+            count ++;
+        } else {
+            encoded[encodeIndex].count = count;
+            encoded[encodeIndex].value = currentValue;
+            encodeIndex ++;
+
+            count = 1;
+            currentValue = channelData[i];
+        }
     }
 
-    printf("First pixel RGB: (%d, %d, %d)\n",
-            pixels[0][1].red,
-            pixels[0][1].green,
-            pixels[0][1].blue 
-    );
+    // store the last run
+    encoded[encodeIndex].count = count;
+    encoded[encodeIndex].value = currentValue;
+    encodeIndex ++;
 
-    freeBMP(pixels, height);
-
+    *outSize = encodeIndex;
+    return encoded;
 }
