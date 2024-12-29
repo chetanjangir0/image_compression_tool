@@ -162,3 +162,47 @@ RLEPair* encodeChannel(unsigned char* channelData, int size, int* outSize){
     *outSize = encodeIndex;
     return encoded;
 }
+
+RLEData* encodeRLE(RGB** pixels, int width, int height){
+    RLEData* rleData = malloc(sizeof(rleData));
+    rleData->width = width;// stores original width
+    rleData->height = height;// stores original height
+
+    int size = width * height;
+
+    // allocate temp arrays for each channel
+    unsigned char* redChannel = malloc(size * sizeof(unsigned char));
+    unsigned char* greenChannel = malloc(size * sizeof(unsigned char));
+    unsigned char* blueChannel = malloc(size * sizeof(unsigned char));
+
+    // extract individual channels
+    int index = 0;
+    for(int i = 0; i < height; i ++){
+        for (int j = 0; j < width; j++){
+            redChannel[index] = pixels[i][j].red;
+            greenChannel[index] = pixels[i][j].green;
+            blueChannel[index] = pixels[i][j].blue;
+            index++;
+        }
+    }
+
+    // Encode each channel
+    rleData->Red = encodeChannel(redChannel, size, &rleData->redSize); 
+    rleData->green = encodeChannel(greenChannel, size, &rleData->greenSize); 
+    rleData->blue = encodeChannel(blueChannel, size, &rleData->blueSize); 
+
+    // free tmp arrays
+    free(redChannel);
+    free(greenChannel);
+    free(blueChannel);
+
+    redChannel = NULL;
+    greenChannel = NULL;
+    blueChannel = NULL;
+
+    return rleData;
+}
+
+// RGB** decodeRLE(RLEData* RLEData){
+//     RGB** pixels
+// }
