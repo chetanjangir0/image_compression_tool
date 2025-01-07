@@ -30,7 +30,7 @@ int main(){
         // Add freeRLEData when implemented
         return 1;
     }
-    // Cleanup
+    
     freeBMP(original, height);
     freeBMP(decoded, height);
     freeRLEData(compressed);

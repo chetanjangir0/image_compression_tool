@@ -3,6 +3,7 @@
 #include "bmp_types.h"
 
 RGB** readBMP(const char* filename, int* width, int* height);
+void writeBMP(const char* filename, RGB** pixels, int width, int height);
 void freeBMP(RGB **pixels, int height);
 
 #endif
